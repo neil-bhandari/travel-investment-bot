@@ -1,0 +1,40 @@
+name: Daily Travel Funding Bot
+
+on:
+  schedule:
+    - cron: "30 14 * * *"   # 7:30 AM Pacific during PDT (14:30 UTC). Will run 6:30 AM during PST.
+  workflow_dispatch:        # allow manual runs from the Actions tab
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run scraper
+        env:
+          PILOTERR_API_KEY: ${{ secrets.PILOTERR_API_KEY }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}  # optional; safe if missing
+          DAYS_SINCE: "1"
+          ROUND_LIMIT_PER_CALL: "50"
+          MAX_COMPANY_LOOKUPS: "20"
+          SLEEP_SEC: "0.2"
+        run: python webscrapercode.py
+
+      - name: Upload CSV artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: funded-travel-csv
+          path: funded_travel_top2_*.csv
+          retention-days: 14
+
