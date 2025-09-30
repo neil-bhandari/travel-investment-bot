@@ -1,0 +1,5 @@
+.venv
+__pycache__/
+.DS_Store
+*.pyc
+funded_travel_top2_*.csv
